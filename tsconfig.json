@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "useUnknownInCatchVariables": false,
+        "lib": [
+            "DOM",
+            "ES2020"
+        ],
+        "jsx": "react-jsx",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "allowJs": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": false,
+        "baseUrl": "./"
+    },
+    "include": [
+        "src",
+        "env.d.ts"
+    ]
+}
