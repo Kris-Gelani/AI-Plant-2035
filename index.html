@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLANTMIND AI — Industrial AI Operating System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        industrial: { 950: '#0B0F19', 900: '#111827', 800: '#1E293B', 700: '#334155', 600: '#475569', 500: '#64748B', 400: '#94A3B8', 300: '#CBD5E1', 100: '#F1F5F9' },
+        accent: { cyan: '#06B6D4', blue: '#3B82F6', emerald: '#10B981', amber: '#F59E0B', rose: '#F43F5E', violet: '#8B5CF6' }
+      },
+      fontFamily: { sans: ['Inter','system-ui','sans-serif'], mono: ['JetBrains Mono','monospace'] }
+    }
+  }
+}
+</script>
+<style>
+body { font-family: 'Inter', system-ui, sans-serif; background: #0B0F19; color: #E2E8F0; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0B0F19; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+.glass-panel { background: rgba(30,41,59,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(51,65,85,0.5); border-radius: 0.75rem; }
+.glass-card { background: rgba(30,41,59,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(51,65,85,0.4); border-radius: 0.5rem; }
+.nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+.nav-item.active { background: rgba(6,182,212,0.1); color: #06B6D4; border: 1px solid rgba(6,182,212,0.2); }
+.nav-item:not(.active) { color: #94A3B8; }
+.nav-item:not(.active):hover { color: #F1F5F9; background: rgba(30,41,59,0.6); }
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform: translateX(8px); } to { opacity:1; transform: translateX(0); } }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.pulse-dot { animation: pulse-dot 2s infinite; }
+.flow-line { stroke-dasharray: 6 6; animation: flow 1.5s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -12; } }
+.chat-msg { animation: msgIn 0.3s ease; }
+@keyframes msgIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+</style>
+</head>
+<body class="h-screen overflow-hidden flex">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-64 h-full bg-slate-900/95 backdrop-blur-xl border-r border-slate-700/50 flex flex-col flex-shrink-0 transition-all duration-300">
+  <div class="p-4 border-b border-slate-700/50">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div>
+        <div class="text-sm font-bold tracking-tight text-slate-100">PLANTMIND</div>
+        <div class="text-[10px] font-medium text-cyan-400 tracking-widest uppercase">AI OS</div>
+      </div>
+    </div>
+  </div>
+  <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="nav-items">
+    <!-- Nav items injected by JS -->
+  </div>
+  <div class="p-3 border-t border-slate-700/50">
+    <button onclick="toggleSidebar()" class="nav-item w-full justify-center lg:justify-start text-slate-400 hover:text-slate-100">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <span class="nav-text">Collapse</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="flex-1 flex flex-col min-w-0">
+  <!-- Header -->
+  <header class="h-16 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 flex-shrink-0">
+    <div class="flex items-center gap-4">
+      <div>
+        <h1 class="text-sm font-semibold text-slate-100">Gulf Coast Refinery Complex — Unit 7</h1>
+        <p class="text-xs text-slate-500">Baytown, Texas, USA</p>
+      </div>
+      <div class="hidden md:flex items-center gap-2 ml-6 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></div>
+        <span class="text-xs font-medium text-emerald-400">LIVE</span>
+        <span class="text-xs text-slate-500">|</span>
+        <span class="text-xs text-slate-400">96.4% Availability</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center gap-2 text-xs text-slate-400 font-mono" id="clock">2026-06-22 15:44:00</div>
+      <div class="relative">
+        <button class="p-2 hover:bg-slate-800 rounded-lg relative">
+          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500"></span>
+        </button>
+      </div>
+      <div class="flex items-center gap-2 pl-4 border-l border-slate-700/50">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white">JM</div>
+        <div class="hidden md:block">
+          <div class="text-xs font-medium text-slate-200">James Morrison</div>
+          <div class="text-[10px] text-slate-500">Plant Manager</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Pages Container -->
+  <main class="flex-1 overflow-y-auto p-6" id="main-content">
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dashboard" class="page active space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Command Center</h2>
+          <p class="text-sm text-slate-500">Real-time operational intelligence for Unit 7</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="glass-card px-3 py-1.5 text-xs text-slate-400">Last Update: <span class="text-slate-300">Live</span></div>
+          <div class="glass-card px-3 py-1.5 text-xs text-emerald-400 flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            All Systems Normal
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4" id="kpi-grid">
+        <!-- KPIs injected by JS -->
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="glass-panel p-5 lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-slate-200">Production Trend</h3>
+            <div class="text-xs text-slate-500">K bbl/day</div>
+          </div>
+          <canvas id="chart-production" height="280"></canvas>
+        </div>
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Cost Breakdown ($/bbl)</h3>
+          <canvas id="chart-cost" height="280"></canvas>
+        </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Reliability Trend</h3>
+          <canvas id="chart-reliability" height="260"></canvas>
+        </div>
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Alarm Distribution</h3>
+          <canvas id="chart-alarms" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIGITAL TWIN PAGE -->
+    <div id="page-digital-twin" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Digital Twin</h2>
+          <p class="text-sm text-slate-500">Real-time refinery process visualization</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="glass-card px-3 py-1.5 text-xs flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400"></div><span class="text-slate-400">Normal</span></div>
+          <div class="glass-card px-3 py-1.5 text-xs flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-amber-400"></div><span class="text-slate-400">Warning</span></div>
+          <div class="glass-card px-3 py-1.5 text-xs flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-rose-400"></div><span class="text-slate-400">Critical</span></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div class="xl:col-span-3 glass-panel p-6 relative overflow-hidden">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Process Flow Diagram — Unit 7</h3>
+          <svg viewBox="0 0 950 450" class="w-full" style="min-height:450px">
+            <defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#1E293B" stroke-width="0.5"/></pattern>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#475569"/></marker></defs>
+            <rect width="100%" height="100%" fill="url(#grid)"/>
+            <g opacity="0.6">
+              <line x1="120" y1="80" x2="180" y2="80" stroke="#06B6D4" stroke-width="2" marker-end="url(#arrow)" class="flow-line"/>
+              <line x1="270" y1="80" x2="330" y2="80" stroke="#06B6D4" stroke-width="2" marker-end="url(#arrow)" class="flow-line"/>
+              <line x1="420" y1="80" x2="480" y2="80" stroke="#06B6D4" stroke-width="2" marker-end="url(#arrow)" class="flow-line"/>
+              <line x1="570" y1="80" x2="630" y2="80" stroke="#06B6D4" stroke-width="2" marker-end="url(#arrow)" class="flow-line"/>
+              <line x1="720" y1="80" x2="780" y2="80" stroke="#06B6D4" stroke-width="2" marker-end="url(#arrow)" class="flow-line"/>
+              <line x1="870" y1="80" x2="870" y2="150" stroke="#06B6D4" stroke-width="2" marker-end="url(#arrow)" class="flow-line"/>
+              <line x1="220" y1="230" x2="220" y2="120" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <line x1="370" y1="230" x2="370" y2="120" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <line x1="520" y1="230" x2="520" y2="120" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <line x1="720" y1="230" x2="720" y2="120" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <line x1="520" y1="120" x2="520" y2="180" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="4 4"/>
+            </g>
+            <!-- Units -->
+            <g onclick="selectUnit('tanks')" class="cursor-pointer"><rect x="0" y="55" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="50" y="75" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Crude Storage</text><text x="50" y="90" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text><circle cx="90" cy="62" r="4" fill="#10B981"/></g>
+            <g onclick="selectUnit('cdu')" class="cursor-pointer"><rect x="150" y="55" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="200" y="75" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">CDU</text><text x="200" y="90" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text><circle cx="240" cy="62" r="4" fill="#10B981"/></g>
+            <g onclick="selectUnit('vdu')" class="cursor-pointer"><rect x="300" y="55" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="350" y="75" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">VDU</text><text x="350" y="90" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text><circle cx="390" cy="62" r="4" fill="#10B981"/></g>
+            <g onclick="selectUnit('fcc')" class="cursor-pointer"><rect x="450" y="55" width="100" height="50" rx="8" fill="#0F172A" stroke="#F59E0B" stroke-width="1.5"/><text x="500" y="75" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">FCC</text><text x="500" y="90" text-anchor="middle" fill="#F59E0B" font-size="9">● WARNING</text><circle cx="540" cy="62" r="4" fill="#F59E0B" class="pulse-dot"/></g>
+            <g onclick="selectUnit('hds')" class="cursor-pointer"><rect x="600" y="55" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="650" y="75" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">HDS</text><text x="650" y="90" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text><circle cx="690" cy="62" r="4" fill="#10B981"/></g>
+            <g onclick="selectUnit('reformer')" class="cursor-pointer"><rect x="750" y="55" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="800" y="75" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Reformer</text><text x="800" y="90" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text><circle cx="840" cy="62" r="4" fill="#10B981"/></g>
+            <g onclick="selectUnit('cooling')" class="cursor-pointer"><rect x="150" y="205" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="200" y="225" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Cooling Tower</text><text x="200" y="240" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text></g>
+            <g onclick="selectUnit('boilers')" class="cursor-pointer"><rect x="300" y="205" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="350" y="225" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Boilers</text><text x="350" y="240" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text></g>
+            <g onclick="selectUnit('flare')" class="cursor-pointer"><rect x="450" y="205" width="100" height="50" rx="8" fill="#0F172A" stroke="#F59E0B" stroke-width="1.5"/><text x="500" y="225" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Flare System</text><text x="500" y="240" text-anchor="middle" fill="#F59E0B" font-size="9">● WARNING</text></g>
+            <g onclick="selectUnit('product')" class="cursor-pointer"><rect x="750" y="205" width="100" height="50" rx="8" fill="#0F172A" stroke="#10B981" stroke-width="1.5"/><text x="800" y="225" text-anchor="middle" fill="#E2E8F0" font-size="11" font-weight="600">Product Storage</text><text x="800" y="240" text-anchor="middle" fill="#10B981" font-size="9">● NORMAL</text></g>
+            <text x="50" y="30" fill="#64748B" font-size="10" font-weight="600">FEED</text>
+            <text x="850" y="30" fill="#64748B" font-size="10" font-weight="600">PRODUCT</text>
+            <text x="50" y="200" fill="#64748B" font-size="10" font-weight="600">UTILITIES</text>
+          </svg>
+        </div>
+        <div class="space-y-4">
+          <div class="glass-panel p-5" id="unit-detail">
+            <div class="flex items-center justify-center py-8 text-slate-500 text-sm">
+              <svg class="w-8 h-8 text-slate-600 mx-auto mb-2 block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <p>Select a unit on the diagram to view real-time process data</p>
+            </div>
+          </div>
+          <div class="glass-panel p-5">
+            <h3 class="text-sm font-semibold text-slate-200 mb-3">Key Process Variables</h3>
+            <div class="space-y-2.5 text-xs" id="process-vars">
+              <div class="flex justify-between"><span class="text-slate-400">CDU Furnace Temp</span><span class="font-mono text-slate-200">385.4 °C</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Reactor Pressure</span><span class="font-mono text-slate-200">28.5 bar</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Crude Feed Rate</span><span class="font-mono text-slate-200">12.4 K bbl/hr</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">VGO Storage Level</span><span class="font-mono text-slate-200">78.2 %</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">HDS Reactor Density</span><span class="font-mono text-slate-200">845.2 kg/m³</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Energy Consumption</span><span class="font-mono text-amber-400">4.85 GJ/bbl ⚠</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI COPILOT PAGE -->
+    <div id="page-ai-copilot" class="page space-y-4 h-full flex flex-col">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+            <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            AI Copilot
+          </h2>
+          <p class="text-sm text-slate-500">Industrial reasoning engine — 94.5% confidence</p>
+        </div>
+        <div class="glass-card px-3 py-1.5 text-xs text-cyan-400 flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+          GPT-4o Industrial Fine-tuned
+        </div>
+      </div>
+      <div class="flex-1 flex gap-6 min-h-0">
+        <div class="flex-1 flex flex-col glass-panel overflow-hidden">
+          <div class="flex-1 overflow-y-auto p-5 space-y-4" id="chat-messages">
+            <div class="flex gap-3">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+              <div class="max-w-[80%] rounded-xl p-4 text-sm leading-relaxed bg-slate-800/60 border border-slate-700/50 text-slate-200">Welcome to PlantMind AI Copilot. I'm analyzing 12,847 real-time process variables across Unit 7.<br><br>I can help you with:<br>• Root cause analysis for profit and carbon deviations<br>• Equipment risk assessment and remaining useful life predictions<br>• Efficiency optimization recommendations<br>• Automated report generation (executive, maintenance, ESG, shift)<br><br>What would you like to know?</div>
+            </div>
+          </div>
+          <div class="p-4 border-t border-slate-700/50">
+            <div class="flex gap-3">
+              <input type="text" id="chat-input" placeholder="Ask about profit, carbon, equipment risk, or request a report..." class="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50" onkeydown="if(event.key==='Enter') sendChat()"/>
+              <button onclick="sendChat()" class="px-4 py-2.5 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded-lg hover:bg-cyan-600/30 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="w-72 hidden lg:flex flex-col gap-3">
+          <div class="glass-panel p-4">
+            <h3 class="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>Suggested Prompts</h3>
+            <div class="space-y-2">
+              <button onclick="sendPrompt('Why is profit decreasing?')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">Why is profit decreasing?</button>
+              <button onclick="sendPrompt('Why is carbon increasing?')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">Why is carbon increasing?</button>
+              <button onclick="sendPrompt('Which equipment is at risk?')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">Which equipment is at risk?</button>
+              <button onclick="sendPrompt('How can we improve efficiency?')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">How can we improve efficiency?</button>
+              <button onclick="sendPrompt('Generate executive summary')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">Generate executive summary</button>
+              <button onclick="sendPrompt('Generate maintenance plan')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">Generate maintenance plan</button>
+              <button onclick="sendPrompt('Generate ESG report')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">Generate ESG report</button>
+              <button onclick="sendPrompt('Generate shift report')" class="w-full text-left p-3 rounded-lg bg-slate-800/40 hover:bg-slate-700/50 border border-slate-700/30 hover:border-cyan-500/30 transition-all text-sm text-slate-300 hover:text-cyan-400">Generate shift report</button>
+            </div>
+          </div>
+          <div class="glass-panel p-4">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2">AI Model Status</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between text-slate-400"><span>Model</span><span class="text-slate-200">PlantMind-4o-Industrial</span></div>
+              <div class="flex justify-between text-slate-400"><span>Context Window</span><span class="text-slate-200">128K tokens</span></div>
+              <div class="flex justify-between text-slate-400"><span>Data Sources</span><span class="text-slate-200">12,847 tags</span></div>
+              <div class="flex justify-between text-slate-400"><span>Latency</span><span class="text-emerald-400">~1.2s</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAN PAGE -->
+    <div id="page-historian" class="page space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Industrial Historian</h2>
+          <p class="text-sm text-slate-500">Time-series data archive and analytics</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="glass-card px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Last 30 Days</button>
+          <button class="glass-card px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg> Filter</button>
+          <button class="glass-card px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Export</button>
+        </div>
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-2" id="historian-tabs">
+        <button onclick="switchHistTab('sensor')" class="hist-tab active flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Sensor History</button>
+        <button onclick="switchHistTab('production')" class="hist-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>Production History</button>
+        <button onclick="switchHistTab('carbon')" class="hist-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Carbon History</button>
+        <button onclick="switchHistTab('maintenance')" class="hist-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200 whitespace-nowrap"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Maintenance History</button>
+      </div>
+      <div id="hist-content">
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="glass-panel p-4"><h4 class="text-xs font-semibold text-slate-300 mb-3">Temperature Trend (°C)</h4><canvas id="chart-hist-temp" height="220"></canvas></div>
+            <div class="glass-panel p-4"><h4 class="text-xs font-semibold text-slate-300 mb-3">Pressure Trend (bar)</h4><canvas id="chart-hist-pressure" height="220"></canvas></div>
+          </div>
+          <div class="glass-panel p-4">
+            <h4 class="text-xs font-semibold text-slate-300 mb-3">24-Hour Sensor Summary</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm"><thead><tr class="text-xs text-slate-500 border-b border-slate-700/50"><th class="text-left py-2 px-3">Time</th><th class="text-right py-2 px-3">Temp (°C)</th><th class="text-right py-2 px-3">Pressure (bar)</th><th class="text-right py-2 px-3">Flow (K bbl/hr)</th><th class="text-right py-2 px-3">Level (%)</th></tr></thead>
+              <tbody id="sensor-table-body"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREDICTIVE MAINTENANCE PAGE -->
+    <div id="page-predictive" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Predictive Maintenance</h2>
+          <p class="text-sm text-slate-500">AI-driven equipment health and failure prediction</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="glass-card px-3 py-1.5 text-xs text-slate-400"><span class="text-rose-400 font-bold">2</span> Critical Assets</div>
+          <div class="glass-card px-3 py-1.5 text-xs text-slate-400"><span class="text-amber-400 font-bold">3</span> High Risk</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-cyan-500/10"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div><span class="text-xs text-slate-500">Avg Health Score</span></div><div class="text-2xl font-bold text-slate-100">85.4%</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-amber-500/10"><svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div><span class="text-xs text-slate-500">Avg Failure Prob</span></div><div class="text-2xl font-bold text-slate-100">6.8%</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-emerald-500/10"><svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><span class="text-xs text-slate-500">Avg RUL</span></div><div class="text-2xl font-bold text-slate-100">3,450 hrs</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-rose-500/10"><svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><span class="text-xs text-slate-500">Maintenance Backlog</span></div><div class="text-2xl font-bold text-slate-100">4 WO</div></div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg><span class="text-xs text-slate-500">Filter:</span>
+          <button onclick="filterEquip('All')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">All</button>
+          <button onclick="filterEquip('Pump')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200">Pump</button>
+          <button onclick="filterEquip('Compressor')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200">Compressor</button>
+          <button onclick="filterEquip('Heat Exchanger')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200">Heat Exchanger</button>
+          <button onclick="filterEquip('Control Valve')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200">Control Valve</button>
+          <button onclick="filterEquip('Furnace')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200">Furnace</button>
+          <button onclick="filterEquip('Reactor')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200">Reactor</button>
+          <button onclick="filterEquip('Column')" class="equip-filter px-3 py-1 rounded-lg text-xs font-medium bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200">Column</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4" id="equipment-grid"></div>
+    </div>
+
+    <!-- ALARM CENTER PAGE -->
+    <div id="page-alarms" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Alarm Center</h2>
+          <p class="text-sm text-slate-500">Real-time alarm management and root cause analysis</p>
+        </div>
+        <div class="glass-card px-3 py-1.5 text-xs text-rose-400 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-rose-500 pulse-dot"></div> 2 Unacknowledged Critical</div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="alarm-stats"></div>
+      <div class="flex items-center gap-3">
+        <div class="relative flex-1 max-w-md">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="alarm-search" placeholder="Search alarms by tag or description..." oninput="filterAlarms()" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"/>
+        </div>
+      </div>
+      <div class="space-y-2" id="alarm-list"></div>
+    </div>
+
+    <!-- OPERATIONS PAGE -->
+    <div id="page-operations" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Operations Center</h2>
+          <p class="text-sm text-slate-500">Shift performance, unit utilization, and loss tracking</p>
+        </div>
+        <div class="glass-card px-3 py-1.5 text-xs text-slate-400">Current Shift: <span class="text-cyan-400 font-medium">Night Shift (18:00–06:00)</span></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Shift Performance</h3>
+          <div class="space-y-4">
+            <div class="bg-slate-800/40 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3"><div class="flex items-center gap-2"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm font-medium text-slate-200">Day Shift (06:00–18:00)</span></div><span class="text-xs font-medium px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">94.7% Efficiency</span></div>
+              <div class="grid grid-cols-3 gap-4 text-center"><div><div class="text-xs text-slate-500 mb-1">Production</div><div class="text-lg font-bold text-slate-100">142.1K</div><div class="text-[10px] text-slate-500">/ 150K target</div></div><div><div class="text-xs text-slate-500 mb-1">Safety</div><div class="text-lg font-bold text-emerald-400">100%</div></div><div><div class="text-xs text-slate-500 mb-1">Notes</div><div class="text-lg font-bold text-slate-100">3</div></div></div>
+              <div class="mt-3"><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-cyan-500" style="width:94.7%"></div></div></div>
+            </div>
+            <div class="bg-slate-800/40 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3"><div class="flex items-center gap-2"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm font-medium text-slate-200">Night Shift (18:00–06:00)</span></div><span class="text-xs font-medium px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">95.1% Efficiency</span></div>
+              <div class="grid grid-cols-3 gap-4 text-center"><div><div class="text-xs text-slate-500 mb-1">Production</div><div class="text-lg font-bold text-slate-100">142.6K</div><div class="text-[10px] text-slate-500">/ 150K target</div></div><div><div class="text-xs text-slate-500 mb-1">Safety</div><div class="text-lg font-bold text-emerald-400">100%</div></div><div><div class="text-xs text-slate-500 mb-1">Notes</div><div class="text-lg font-bold text-slate-100">2</div></div></div>
+              <div class="mt-3"><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-cyan-500" style="width:95.1%"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Unit Performance</h3>
+          <div class="space-y-3" id="unit-performance"></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Downtime Tracking</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm"><thead><tr class="text-xs text-slate-500 border-b border-slate-700/50"><th class="text-left py-2 px-3">Date</th><th class="text-left py-2 px-3">Unit</th><th class="text-left py-2 px-3">Reason</th><th class="text-right py-2 px-3">Duration</th><th class="text-right py-2 px-3">Cost</th></tr></thead>
+            <tbody>
+              <tr class="border-b border-slate-700/30 hover:bg-slate-800/40"><td class="py-2 px-3 text-slate-300">Jun 22</td><td class="py-2 px-3 text-slate-200">FCC</td><td class="py-2 px-3 text-slate-200">C-201 Seal Leak</td><td class="py-2 px-3 text-right text-slate-200 font-mono">1.2h</td><td class="py-2 px-3 text-right text-rose-400 font-mono">$62,000</td></tr>
+              <tr class="border-b border-slate-700/30 hover:bg-slate-800/40"><td class="py-2 px-3 text-slate-300">Jun 21</td><td class="py-2 px-3 text-slate-200">Utilities</td><td class="py-2 px-3 text-slate-200">Electrical Trip</td><td class="py-2 px-3 text-right text-slate-200 font-mono">0.8h</td><td class="py-2 px-3 text-right text-rose-400 font-mono">$38,000</td></tr>
+              <tr class="border-b border-slate-700/30 hover:bg-slate-800/40"><td class="py-2 px-3 text-slate-300">Jun 20</td><td class="py-2 px-3 text-slate-200">CDU</td><td class="py-2 px-3 text-slate-200">P-101A Maintenance</td><td class="py-2 px-3 text-right text-slate-200 font-mono">2.5h</td><td class="py-2 px-3 text-right text-rose-400 font-mono">$125,000</td></tr>
+              <tr class="border-b border-slate-700/30 hover:bg-slate-800/40"><td class="py-2 px-3 text-slate-300">Jun 19</td><td class="py-2 px-3 text-slate-200">DCS</td><td class="py-2 px-3 text-slate-200">Control System Reset</td><td class="py-2 px-3 text-right text-slate-200 font-mono">0.5h</td><td class="py-2 px-3 text-right text-rose-400 font-mono">$24,000</td></tr>
+              <tr class="border-b border-slate-700/30 hover:bg-slate-800/40"><td class="py-2 px-3 text-slate-300">Jun 18</td><td class="py-2 px-3 text-slate-200">VDU</td><td class="py-2 px-3 text-slate-200">E-301 Cleaning</td><td class="py-2 px-3 text-right text-slate-200 font-mono">3.0h</td><td class="py-2 px-3 text-right text-rose-400 font-mono">$148,000</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Loss Tracking</h3>
+          <canvas id="chart-losses" height="220"></canvas>
+          <div class="mt-3 text-center"><div class="text-xs text-slate-500">Total Losses (MTD)</div><div class="text-xl font-bold text-rose-400">$1,110,000</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARBON INTELLIGENCE PAGE -->
+    <div id="page-carbon" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Carbon Intelligence</h2>
+          <p class="text-sm text-slate-500">Emissions tracking, net-zero progress, and reduction planning</p>
+        </div>
+        <div class="glass-card px-3 py-1.5 text-xs text-emerald-400 flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Net Zero Target: 2045</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="glass-card p-5 border-l-4 border-l-rose-500"><div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span class="text-xs text-slate-500 uppercase tracking-wider">Scope 1</span></div><div class="text-2xl font-bold text-slate-100">1.25M</div><div class="text-xs text-slate-500 mt-1">tCO₂e / year</div><div class="mt-3 text-xs text-slate-400">Direct emissions from combustion and process</div></div>
+        <div class="glass-card p-5 border-l-4 border-l-amber-500"><div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span class="text-xs text-slate-500 uppercase tracking-wider">Scope 2</span></div><div class="text-2xl font-bold text-slate-100">342K</div><div class="text-xs text-slate-500 mt-1">tCO₂e / year</div><div class="mt-3 text-xs text-slate-400">Indirect emissions from purchased electricity</div></div>
+        <div class="glass-card p-5 border-l-4 border-l-blue-500"><div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 014 0m6 0a2 2 0 104 0m-4 0a2 2 0 014 0"/></svg><span class="text-xs text-slate-500 uppercase tracking-wider">Scope 3</span></div><div class="text-2xl font-bold text-slate-100">2.89M</div><div class="text-xs text-slate-500 mt-1">tCO₂e / year</div><div class="mt-3 text-xs text-slate-400">Value chain emissions from crude transport and product use</div></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Net Zero Progress</h3>
+          <div class="flex items-center justify-center pt-4">
+            <div class="relative w-40 h-40">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#1E293B" stroke-width="8"/>
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#10B981" stroke-width="8" stroke-dasharray="110.9 264" stroke-linecap="round"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center"><div class="text-3xl font-bold text-emerald-400">34.2%</div><div class="text-[10px] text-slate-500 uppercase tracking-wider">Complete</div></div>
+            </div>
+          </div>
+          <div class="mt-6 space-y-2 text-xs">
+            <div class="flex justify-between text-slate-400"><span>2020 Baseline</span><span class="text-slate-200">4.85 kg CO₂/bbl</span></div>
+            <div class="flex justify-between text-slate-400"><span>Current</span><span class="text-emerald-400">4.58 kg CO₂/bbl</span></div>
+            <div class="flex justify-between text-slate-400"><span>2030 Target</span><span class="text-slate-200">3.20 kg CO₂/bbl</span></div>
+            <div class="flex justify-between text-slate-400"><span>2045 Target</span><span class="text-slate-200">Net Zero</span></div>
+          </div>
+        </div>
+        <div class="lg:col-span-2 glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Carbon Intensity Forecast</h3>
+          <canvas id="chart-carbon-forecast" height="280"></canvas>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Emission Hotspots</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3"><div class="w-12 text-xs text-slate-500 text-right">38.9%</div><div class="flex-1"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Fired Heaters</span><span class="text-slate-400 font-mono">485K t</span></div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-rose-500" style="width:38.9%"></div></div></div></div>
+            <div class="flex items-center gap-3"><div class="w-12 text-xs text-slate-500 text-right">25.1%</div><div class="flex-1"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300">FCC Regenerator</span><span class="text-slate-400 font-mono">312K t</span></div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-rose-500" style="width:25.1%"></div></div></div></div>
+            <div class="flex items-center gap-3"><div class="w-12 text-xs text-slate-500 text-right">11.4%</div><div class="flex-1"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Flare System</span><span class="text-slate-400 font-mono">142K t</span></div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-rose-500" style="width:11.4%"></div></div></div></div>
+            <div class="flex items-center gap-3"><div class="w-12 text-xs text-slate-500 text-right">7.9%</div><div class="flex-1"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Boilers & Steam</span><span class="text-slate-400 font-mono">98K t</span></div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-rose-500" style="width:7.9%"></div></div></div></div>
+            <div class="flex items-center gap-3"><div class="w-12 text-xs text-slate-500 text-right">7.0%</div><div class="flex-1"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Turbines & CHP</span><span class="text-slate-400 font-mono">87K t</span></div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-rose-500" style="width:7%"></div></div></div></div>
+            <div class="flex items-center gap-3"><div class="w-12 text-xs text-slate-500 text-right">9.7%</div><div class="flex-1"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Other Process</span><span class="text-slate-400 font-mono">123K t</span></div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full bg-rose-500" style="width:9.7%"></div></div></div></div>
+          </div>
+        </div>
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Reduction Opportunities</h3>
+          <div class="space-y-3">
+            <div class="bg-slate-800/40 rounded-lg p-3 hover:bg-slate-800/60 transition-colors"><div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-slate-200">Hydrogen Fuel Switching</span><span class="text-xs text-emerald-400 font-medium">3.2 yr payback</span></div><div class="grid grid-cols-3 gap-2 text-xs"><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">Potential</div><div class="font-mono text-emerald-400">185K t</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">CAPEX</div><div class="font-mono text-slate-200">$12.4M</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">NPV</div><div class="font-mono text-cyan-400">$15.7M</div></div></div></div>
+            <div class="bg-slate-800/40 rounded-lg p-3 hover:bg-slate-800/60 transition-colors"><div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-slate-200">Carbon Capture on FCC</span><span class="text-xs text-emerald-400 font-medium">5.8 yr payback</span></div><div class="grid grid-cols-3 gap-2 text-xs"><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">Potential</div><div class="font-mono text-emerald-400">245K t</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">CAPEX</div><div class="font-mono text-slate-200">$45.0M</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">NPV</div><div class="font-mono text-cyan-400">$20.8M</div></div></div></div>
+            <div class="bg-slate-800/40 rounded-lg p-3 hover:bg-slate-800/60 transition-colors"><div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-slate-200">Flare Gas Recovery</span><span class="text-xs text-emerald-400 font-medium">2.1 yr payback</span></div><div class="grid grid-cols-3 gap-2 text-xs"><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">Potential</div><div class="font-mono text-emerald-400">98K t</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">CAPEX</div><div class="font-mono text-slate-200">$8.2M</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">NPV</div><div class="font-mono text-cyan-400">$8.3M</div></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MULTI-SITE PAGE -->
+    <div id="page-multi-site" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Multi-Site Command Center</h2>
+          <p class="text-sm text-slate-500">Global portfolio performance comparison and benchmarking</p>
+        </div>
+        <div class="glass-card px-3 py-1.5 text-xs text-cyan-400 flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 6 Active Sites</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="site-cards"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-5"><h3 class="text-sm font-semibold text-slate-200 mb-4">Profit Comparison ($M/day)</h3><canvas id="chart-profit-compare" height="260"></canvas></div>
+        <div class="glass-panel p-5"><h3 class="text-sm font-semibold text-slate-200 mb-4">Performance Radar</h3><canvas id="chart-radar" height="260"></canvas></div>
+      </div>
+      <div class="glass-panel p-5">
+        <h3 class="text-sm font-semibold text-slate-200 mb-4">Site Rankings</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div><div class="text-xs text-slate-500 mb-2 flex items-center gap-2"><svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.587 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.587 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.587 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.587 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg> By Profitability</div><div class="space-y-2" id="profit-ranking"></div></div>
+          <div><div class="text-xs text-slate-500 mb-2 flex items-center gap-2"><svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.587 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.587 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.587 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.587 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg> By ESG Score</div><div class="space-y-2" id="esg-ranking"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS PAGE -->
+    <div id="page-reports" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Executive War Room</h2>
+          <p class="text-sm text-slate-500">Boardroom intelligence and strategic reporting</p>
+        </div>
+        <button class="px-4 py-2 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-medium hover:bg-cyan-600/30 transition-colors flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Export Board Pack</button>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-cyan-500/10"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><span class="text-xs text-slate-500">Revenue</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">$4.82M</span><span class="text-xs text-slate-500">/day</span></div><div class="text-xs mt-1 text-rose-400 font-medium">-1.2% vs last period</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-emerald-500/10"><svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg></div><span class="text-xs text-slate-500">EBITDA</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">$1.89M</span><span class="text-xs text-slate-500">/day</span></div><div class="text-xs mt-1 text-rose-400 font-medium">-2.8% vs last period</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-amber-500/10"><svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div><span class="text-xs text-slate-500">Profit</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">$1.24M</span><span class="text-xs text-slate-500">/day</span></div><div class="text-xs mt-1 text-rose-400 font-medium">-3.5% vs last period</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-rose-500/10"><svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg></div><span class="text-xs text-slate-500">Carbon</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">42.8</span><span class="text-xs text-slate-500">kg/bbl</span></div><div class="text-xs mt-1 text-rose-400 font-medium">+1.8% vs last period</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-amber-500/10"><svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><span class="text-xs text-slate-500">Risk Score</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">6.2</span><span class="text-xs text-slate-500">/10</span></div><div class="text-xs mt-1 text-emerald-400 font-medium">-0.5% vs last period</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-emerald-500/10"><svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><span class="text-xs text-slate-500">Reliability</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">98.7%</span></div><div class="text-xs mt-1 text-emerald-400 font-medium">+0.2% vs last period</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-violet-500/10"><svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><span class="text-xs text-slate-500">AI Impact</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">+$340K</span><span class="text-xs text-slate-500">/mo</span></div><div class="text-xs mt-1 text-emerald-400 font-medium">+5.2% vs last period</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-cyan-500/10"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.587 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.587 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.587 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.587 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg></div><span class="text-xs text-slate-500">ESG Score</span></div><div class="flex items-baseline gap-1"><span class="text-xl font-bold text-slate-100">78.4</span><span class="text-xs text-slate-500">/100</span></div><div class="text-xs mt-1 text-emerald-400 font-medium">+2.1% vs last period</div></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg> Top Opportunities</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">Crude Slate Optimization</div><div class="text-xs text-slate-500">Probability: 85% • Status: Ready</div></div><div class="text-sm font-bold text-emerald-400">+$840K/mo</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">FCC Air Compressor Upgrade</div><div class="text-xs text-slate-500">Probability: 70% • Status: Planning</div></div><div class="text-sm font-bold text-emerald-400">+$520K/mo</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">Steam System Leak Repair</div><div class="text-xs text-slate-500">Probability: 95% • Status: Ready</div></div><div class="text-sm font-bold text-emerald-400">+$380K/mo</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">Catalyst Management AI</div><div class="text-xs text-slate-500">Probability: 80% • Status: Pilot</div></div><div class="text-sm font-bold text-emerald-400">+$360K/mo</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">Flare Gas Recovery</div><div class="text-xs text-slate-500">Probability: 90% • Status: Ready</div></div><div class="text-sm font-bold text-emerald-400">+$290K/mo</div></div>
+          </div>
+        </div>
+        <div class="glass-panel p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2"><svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Top Risks</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">C-201 Compressor Failure</div><div class="text-xs text-slate-500">Prob: 15% • Mitigation: Pre-staged seal kit</div></div><div class="text-sm font-bold text-rose-400">$620K/day</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">Carbon Tax Exposure (EU CBAM)</div><div class="text-xs text-slate-500">Prob: 60% • Mitigation: SAF co-processing</div></div><div class="text-sm font-bold text-rose-400">$4.2M/yr</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">FCC Catalyst Deactivation</div><div class="text-xs text-slate-500">Prob: 45% • Mitigation: Fresh catalyst addition</div></div><div class="text-sm font-bold text-rose-400">$43K/day</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">Crude Supply Disruption</div><div class="text-xs text-slate-500">Prob: 12% • Mitigation: Diversified suppliers</div></div><div class="text-sm font-bold text-rose-400">$1.8M/day</div></div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg hover:bg-slate-800/60 transition-colors"><div><div class="text-sm font-medium text-slate-200">Cybersecurity Incident</div><div class="text-xs text-slate-500">Prob: 8% • Mitigation: OT segmentation audit</div></div><div class="text-sm font-bold text-rose-400">$2.5M+</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="glass-panel p-5">
+        <h3 class="text-sm font-semibold text-slate-200 mb-4">Report Center</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="bg-slate-800/40 rounded-lg p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all"><div class="flex items-start justify-between mb-3"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-[10px] text-slate-500 uppercase tracking-wider">Daily</span></div><div class="text-sm font-medium text-slate-200 mb-1">Daily Operations Report</div><div class="text-xs text-slate-500 mb-3">Shift summary, production, safety, and key events</div><div class="flex items-center justify-between"><span class="text-[10px] text-slate-600">Last: 2026-06-22 06:00</span><button class="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded text-xs font-medium hover:bg-cyan-600/30 transition-colors">Generate</button></div></div>
+          <div class="bg-slate-800/40 rounded-lg p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all"><div class="flex items-start justify-between mb-3"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-[10px] text-slate-500 uppercase tracking-wider">Weekly</span></div><div class="text-sm font-medium text-slate-200 mb-1">Weekly Performance Report</div><div class="text-xs text-slate-500 mb-3">KPI trends, OEE, availability, and financial summary</div><div class="flex items-center justify-between"><span class="text-[10px] text-slate-600">Last: 2026-06-16 18:00</span><button class="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded text-xs font-medium hover:bg-cyan-600/30 transition-colors">Generate</button></div></div>
+          <div class="bg-slate-800/40 rounded-lg p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all"><div class="flex items-start justify-between mb-3"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-[10px] text-slate-500 uppercase tracking-wider">Monthly</span></div><div class="text-sm font-medium text-slate-200 mb-1">Monthly Executive Report</div><div class="text-xs text-slate-500 mb-3">Full P&L, operational metrics, and strategic initiatives</div><div class="flex items-center justify-between"><span class="text-[10px] text-slate-600">Last: 2026-06-01 09:00</span><button class="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded text-xs font-medium hover:bg-cyan-600/30 transition-colors">Generate</button></div></div>
+          <div class="bg-slate-800/40 rounded-lg p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all"><div class="flex items-start justify-between mb-3"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-[10px] text-slate-500 uppercase tracking-wider">Quarterly</span></div><div class="text-sm font-medium text-slate-200 mb-1">Executive Board Pack</div><div class="text-xs text-slate-500 mb-3">Investor-ready summary with ESG and risk metrics</div><div class="flex items-center justify-between"><span class="text-[10px] text-slate-600">Last: 2026-04-01 10:00</span><button class="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded text-xs font-medium hover:bg-cyan-600/30 transition-colors">Generate</button></div></div>
+          <div class="bg-slate-800/40 rounded-lg p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all"><div class="flex items-start justify-between mb-3"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-[10px] text-slate-500 uppercase tracking-wider">Monthly</span></div><div class="text-sm font-medium text-slate-200 mb-1">Maintenance Performance Report</div><div class="text-xs text-slate-500 mb-3">MTBF, MTTR, work order backlog, and cost analysis</div><div class="flex items-center justify-between"><span class="text-[10px] text-slate-600">Last: 2026-06-01 08:00</span><button class="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded text-xs font-medium hover:bg-cyan-600/30 transition-colors">Generate</button></div></div>
+          <div class="bg-slate-800/40 rounded-lg p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all"><div class="flex items-start justify-between mb-3"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-[10px] text-slate-500 uppercase tracking-wider">Monthly</span></div><div class="text-sm font-medium text-slate-200 mb-1">Carbon & ESG Report</div><div class="text-xs text-slate-500 mb-3">Emissions inventory, reduction progress, and compliance</div><div class="flex items-center justify-between"><span class="text-[10px] text-slate-600">Last: 2026-06-01 11:00</span><button class="px-3 py-1.5 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded text-xs font-medium hover:bg-cyan-600/30 transition-colors">Generate</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="page-admin" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Admin Center</h2>
+          <p class="text-sm text-slate-500">User management and role-based access control</p>
+        </div>
+        <button class="px-4 py-2 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-medium hover:bg-cyan-600/30 transition-colors flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg> Add User</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-cyan-500/10"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div><span class="text-xs text-slate-500">Total Users</span></div><div class="text-2xl font-bold text-slate-100">7</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-emerald-500/10"><svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><span class="text-xs text-slate-500">Active Now</span></div><div class="text-2xl font-bold text-slate-100">5</div></div>
+        <div class="glass-card p-4"><div class="flex items-center gap-2 mb-2"><div class="p-1.5 rounded-lg bg-violet-500/10"><svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><span class="text-xs text-slate-500">Roles Configured</span></div><div class="text-2xl font-bold text-slate-100">5</div></div>
+      </div>
+      <div class="glass-panel p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="relative flex-1 max-w-sm">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="admin-search" placeholder="Search users..." oninput="filterAdmin()" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"/>
+          </div>
+          <div class="flex gap-2" id="admin-role-filters"></div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm"><thead><tr class="text-xs text-slate-500 border-b border-slate-700/50"><th class="text-left py-3 px-3">User</th><th class="text-left py-3 px-3">Role</th><th class="text-left py-3 px-3">Plant</th><th class="text-left py-3 px-3">Status</th><th class="text-left py-3 px-3">Last Active</th><th class="text-right py-3 px-3">Actions</th></tr></thead>
+          <tbody id="admin-table-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div id="page-settings" class="page space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">Settings</h2>
+          <p class="text-sm text-slate-500">Platform configuration and system preferences</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-2 bg-slate-700/50 text-slate-300 rounded-lg text-xs font-medium hover:bg-slate-700 transition-colors flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Reset</button>
+          <button onclick="this.textContent='Saved!'" class="px-4 py-2 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-medium hover:bg-cyan-600/30 transition-colors flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-4 4m0 0l-4-4m4 4V4"/></svg> Save Changes</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="space-y-2" id="settings-nav"></div>
+        <div class="lg:col-span-3 glass-panel p-5" id="settings-content"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ===== DATA =====
+const KPI_DATA = [
+  { title: 'Production', value: '284.7', unit: 'K bbl/day', target: '300', trend: 2.3, status: 'good', icon: 'factory' },
+  { title: 'Revenue', value: '4.82', unit: '$M/day', target: '5.0', trend: -1.2, status: 'warning', icon: 'dollar' },
+  { title: 'Profit', value: '1.24', unit: '$M/day', target: '1.5', trend: -3.5, status: 'warning', icon: 'trend' },
+  { title: 'Carbon', value: '42.8', unit: 'kg CO₂/bbl', target: '38', trend: 1.8, status: 'warning', icon: 'leaf' },
+  { title: 'Reliability', value: '98.7', unit: '%', target: '99.0', trend: 0.2, status: 'good', icon: 'shield' },
+  { title: 'Availability', value: '96.4', unit: '%', target: '98.0', trend: -0.5, status: 'warning', icon: 'activity' },
+  { title: 'Efficiency', value: '91.2', unit: '%', target: '92.0', trend: 0.8, status: 'good', icon: 'zap' },
+  { title: 'Plant Health', value: '87.3', unit: '/100', target: '90', trend: -1.1, status: 'warning', icon: 'heart' },
+  { title: 'AI Confidence', value: '94.5', unit: '%', target: '95', trend: 1.2, status: 'good', icon: 'brain' },
+  { title: 'ESG Score', value: '78.4', unit: '/100', target: '85', trend: 2.1, status: 'good', icon: 'award' },
+  { title: 'MTBF', value: '4,520', unit: 'hrs', target: '5,000', trend: -120, status: 'warning', icon: 'clock' },
+  { title: 'MTTR', value: '4.2', unit: 'hrs', target: '4.0', trend: -0.3, status: 'good', icon: 'wrench' },
+  { title: 'OEE', value: '84.6', unit: '%', target: '85', trend: 0.5, status: 'good', icon: 'gauge' },
+];
+
+const EQUIPMENT = [
+  { id: 'P-101A', name: 'Crude Charge Pump A', type: 'Pump', health: 92, failureProb: 3.2, rul: 4200, priority: 'Low', risk: 'Low' },
+  { id: 'P-101B', name: 'Crude Charge Pump B', type: 'Pump', health: 88, failureProb: 5.1, rul: 3100, priority: 'Medium', risk: 'Medium' },
+  { id: 'C-201', name: 'FCC Air Compressor', type: 'Compressor', health: 76, failureProb: 12.4, rul: 1800, priority: 'High', risk: 'High' },
+  { id: 'E-301', name: 'Reflux Condenser', type: 'Heat Exchanger', health: 94, failureProb: 2.1, rul: 5600, priority: 'Low', risk: 'Low' },
+  { id: 'E-302', name: 'Product Cooler', type: 'Heat Exchanger', health: 81, failureProb: 8.7, rul: 2400, priority: 'Medium', risk: 'Medium' },
+  { id: 'V-401', name: 'HDS Control Valve', type: 'Control Valve', health: 71, failureProb: 15.3, rul: 1200, priority: 'High', risk: 'High' },
+  { id: 'V-402', name: 'Reflux Control Valve', type: 'Control Valve', health: 89, failureProb: 4.5, rul: 3800, priority: 'Low', risk: 'Low' },
+  { id: 'F-501', name: 'Reformer Furnace', type: 'Furnace', health: 85, failureProb: 6.8, rul: 2900, priority: 'Medium', risk: 'Medium' },
+  { id: 'R-601', name: 'Hydrocracker Reactor', type: 'Reactor', health: 96, failureProb: 1.8, rul: 7200, priority: 'Low', risk: 'Low' },
+  { id: 'R-602', name: 'Hydrotreater Reactor', type: 'Reactor', health: 78, failureProb: 11.2, rul: 2100, priority: 'High', risk: 'High' },
+  { id: 'T-701', name: 'CDU Atmospheric Column', type: 'Column', health: 91, failureProb: 3.8, rul: 4500, priority: 'Low', risk: 'Low' },
+  { id: 'T-702', name: 'VDU Vacuum Column', type: 'Column', health: 83, failureProb: 7.4, rul: 2600, priority: 'Medium', risk: 'Medium' },
+];
+
+const ALARMS = [
+  { id: 1, tag: 'TI-101A', description: 'CDU Furnace Bridge Wall Temp High', category: 'High', timestamp: '20:45', unit: 'F-501', rootCause: 'Fouling in convection section', action: 'Schedule convection bank cleaning during next turnaround', acknowledged: false },
+  { id: 2, tag: 'PI-201B', description: 'FCC Reactor Differential Pressure High', category: 'Critical', timestamp: '20:38', unit: 'R-301', rootCause: 'Catalyst circulation restriction', action: 'Reduce feed rate by 10% and inspect slide valves', acknowledged: false },
+  { id: 3, tag: 'FI-301C', description: 'H2 Recycle Flow Low', category: 'Warning', timestamp: '20:30', unit: 'C-201', rootCause: 'Compressor seal leakage', action: 'Monitor seal differential pressure and plan seal replacement', acknowledged: true },
+  { id: 4, tag: 'LI-401D', description: 'VGO Storage Tank Level Very High', category: 'High', timestamp: '20:25', unit: 'TK-402', rootCause: 'Downstream unit trip', action: 'Divert flow to alternate tank and investigate trip cause', acknowledged: false },
+  { id: 5, tag: 'AI-501E', description: 'Flare Radiation Monitor Alarm', category: 'Warning', timestamp: '20:15', unit: 'Flare', rootCause: 'Flare pilot flame instability', action: 'Check pilot gas supply and flame detection system', acknowledged: true },
+  { id: 6, tag: 'VI-601F', description: 'Cooling Tower Fan Vibration High', category: 'Warning', timestamp: '20:10', unit: 'CT-701', rootCause: 'Bearing wear on Fan B', action: 'Schedule bearing replacement within 72 hours', acknowledged: true },
+  { id: 7, tag: 'CI-701G', description: 'CO Emission from Heater Stack', category: 'Critical', timestamp: '20:05', unit: 'F-502', rootCause: 'Incomplete combustion — burner misalignment', action: 'Reduce firing rate and inspect burner alignment immediately', acknowledged: false },
+  { id: 8, tag: 'SI-801H', description: 'Safety Instrumented System Trip', category: 'Emergency', timestamp: '19:58', unit: 'Unit-7', rootCause: 'High-high pressure in separator', action: 'Initiate emergency shutdown procedure per SOP-7.3.1', acknowledged: false },
+  { id: 9, tag: 'TI-901I', description: 'Boiler Feed Water Temp Low', category: 'Info', timestamp: '19:45', unit: 'B-801', rootCause: 'Feedwater heater tube leak', action: 'Isolate leaking heater and switch to spare', acknowledged: true },
+  { id: 10, tag: 'PI-002J', description: 'Product Export Pressure Low', category: 'Warning', timestamp: '19:30', unit: 'P-801', rootCause: 'Pump mechanical seal degradation', action: 'Switch to standby pump and plan seal replacement', acknowledged: true },
+];
+
+const SITES = [
+  { name: 'Reliance Jamnagar', country: 'India', profit: 8.2, carbon: 38.5, reliability: 99.1, efficiency: 93.4, esg: 82.1, production: 1240 },
+  { name: 'Exxon Baytown', country: 'USA', profit: 6.8, carbon: 42.8, reliability: 98.7, efficiency: 91.2, esg: 78.4, production: 584 },
+  { name: 'Shell Pernis', country: 'Netherlands', profit: 5.4, carbon: 35.2, reliability: 97.9, efficiency: 89.6, esg: 85.3, production: 404 },
+  { name: 'Saudi Aramco Abqaiq', country: 'Saudi Arabia', profit: 9.1, carbon: 45.1, reliability: 99.4, efficiency: 94.2, esg: 71.2, production: 945 },
+  { name: 'BP Rotterdam', country: 'Netherlands', profit: 4.9, carbon: 36.8, reliability: 98.2, efficiency: 88.4, esg: 81.7, production: 400 },
+  { name: 'Total Antwerp', country: 'Belgium', profit: 5.7, carbon: 34.5, reliability: 98.5, efficiency: 90.1, esg: 84.2, production: 338 },
+];
+
+const USERS = [
+  { id: 1, name: 'James Morrison', email: 'j.morrison@plantmind.ai', role: 'Admin', plant: 'All Sites', lastActive: '2 min ago', status: 'Active' },
+  { id: 2, name: 'Sarah Chen', email: 's.chen@plantmind.ai', role: 'Plant Manager', plant: 'Baytown', lastActive: '15 min ago', status: 'Active' },
+  { id: 3, name: 'Raj Patel', email: 'r.patel@plantmind.ai', role: 'Process Engineer', plant: 'Baytown', lastActive: '1 hr ago', status: 'Active' },
+  { id: 4, name: 'Elena Vasquez', email: 'e.vasquez@plantmind.ai', role: 'Maintenance Engineer', plant: 'Baytown', lastActive: '3 hr ago', status: 'Active' },
+  { id: 5, name: 'Michael Okafor', email: 'm.okafor@plantmind.ai', role: 'Operator', plant: 'Baytown', lastActive: '5 min ago', status: 'Active' },
+  { id: 6, name: 'David Kim', email: 'd.kim@plantmind.ai', role: 'Process Engineer', plant: 'Jamnagar', lastActive: '2 hr ago', status: 'Away' },
+  { id: 7, name: 'Lisa Thompson', email: 'l.thompson@plantmind.ai', role: 'Maintenance Engineer', plant: 'Rotterdam', lastActive: '1 day ago', status: 'Inactive' },
+];
+
+const AI_RESPONSES = {
+  'profit': `Profit has decreased by 3.5% ($43K/day) over the last 72 hours. Root cause analysis indicates:
+
+1. Crude Spread Compression: Brent-WTI spread narrowed to $2.10/bbl from $3.40, reducing margin capture.
+2. FCC Yield Degradation: Gasoline yield dropped 1.2% due to catalyst activity decline.
+3. Energy Cost Spike: Natural gas price increased 8% to $3.85/MMBtu, raising utility costs by $18K/day.
+4. Unplanned Slowdown: C-201 compressor seal leak forced 10% feed reduction for 6 hours.
+
+Recommended Actions:
+- Optimize crude slate: increase light sweet crude to 35% of feed
+- Schedule catalyst addition: 5 tons fresh catalyst recommended
+- Evaluate gas contract renegotiation or hedge Q3 exposure`,
+  'carbon': `Carbon intensity increased to 42.8 kg CO₂/bbl (+1.8% this week). Contributing factors:
+
+1. FCC Regenerator: CO₂ emissions up 4.2% due to higher coke burn rate.
+2. Fired Heaters: Heater efficiency dropped 2.1% due to convection section fouling.
+3. Flare Events: Unplanned flaring during compressor trip released 12.4 tonnes CO₂e.
+4. Steam System: Leak identified in 600# header — estimated 5 t/hr loss.
+
+Mitigation Plan:
+- Immediate: Repair steam leak (saves 2.1 kg CO₂/bbl)
+- Short-term: Clean convection banks during next scheduled window
+- Medium-term: Install flare gas recovery compressor`,
+  'equipment': `Risk assessment based on real-time vibration, temperature, and process deviation analysis:
+
+CRITICAL (Action Required within 48h):
+• V-401 (HDS Control Valve): Health 71%, failure probability 15.3%. RUL: 1,200 hrs.
+• R-602 (Hydrotreater Reactor): Health 78%, internal cladding stress indicators elevated. RUL: 2,100 hrs.
+
+HIGH (Action Required within 2 weeks):
+• C-201 (FCC Air Compressor): Health 76%, thrust bearing temperature trending up. RUL: 1,800 hrs.
+• E-302 (Product Cooler): Health 81%, tube-side fouling increasing pressure drop. RUL: 2,400 hrs.`,
+  'efficiency': `Overall Equipment Effectiveness is 84.6% (world-class threshold: 85%). Breakdown:
+
+• Availability: 96.4% — lost 3.6% due to C-201 compressor slowdown and V-401 valve maintenance.
+• Performance: 91.2% — running at 91.2% of design rate. FCC throughput limited by air compressor capacity.
+• Quality: 96.8% — diesel sulfur slightly elevated to 8.2 ppm (spec: <10 ppm).
+
+Improvement Opportunities (worth $2.1M/month combined):
+1. Eliminate compressor bottleneck: Install spare air compressor or upgrade impeller (+$840K/month)
+2. Reduce changeover time: CDU crude switch average 4.2 hrs, target 2.5 hrs (+$520K/month)
+3. Optimize steam system: Fix 5 t/hr leak and reduce venting (+$380K/month)
+4. Improve catalyst management: Add real-time E-cat monitoring (+$360K/month)`,
+  'executive': `## Executive Summary — Gulf Coast Refinery Complex
+Period: June 16–22, 2026 | Shift: Night Shift (18:00–06:00)
+
+Financial Performance
+- Revenue: $4.82M/day (↓1.2% vs plan)
+- EBITDA: $1.89M/day (↓2.8%)
+- Profit Margin: 25.7% (target: 30%)
+- Cash Cost: $3.58/bbl (target: $3.20/bbl)
+
+Operational Performance
+- Production: 284.7K bbl/day (94.9% of plan)
+- Availability: 96.4% (↓1.1% vs last week)
+- OEE: 84.6% (approaching world-class)
+- Safety: 0 LTI, 2 near-misses reported
+
+Key Issues
+1. C-201 compressor seal leak — 10% rate reduction for 6 hours
+2. Carbon intensity elevated to 42.8 kg CO₂/bbl
+3. FCC catalyst activity declining — yield impact $43K/day
+
+Actions for Next Shift
+1. Monitor C-201 vibration closely — maintenance standby activated
+2. Initiate catalyst addition procedure at 06:30
+3. Review crude slate optimization with trading desk`,
+  'maintenance': `## AI-Generated Maintenance Plan — Week 26 (June 23–29)
+
+Priority 1 — Critical (Execute Immediately)
+| Equipment | Work | Duration | Cost | Impact |
+|-----------|------|----------|------|--------|
+| V-401 | Replace stem packing & actuator calibration | 8 hrs | $18,000 | Avoid $120K/day lost production |
+| R-602 | Internal inspection — cladding UT scan | 24 hrs | $45,000 | Prevent catastrophic failure |
+
+Priority 2 — High (Execute This Week)
+| Equipment | Work | Duration | Cost | Impact |
+|-----------|------|----------|------|--------|
+| C-201 | Seal replacement & rotor balance | 36 hrs | $85,000 | Restore 10% capacity |
+| E-302 | Chemical cleaning — tube side | 12 hrs | $22,000 | Restore heat transfer efficiency |
+
+Resource Requirements: 18 technicians, $230,000 budget, 116 total hours.`,
+  'esg': `## ESG Performance Report — Q2 2026
+
+Overall ESG Score: 78.4/100 (Industry benchmark: 72.0)
+
+Environmental (Score: 76.2)
+- GHG Intensity: 42.8 kg CO₂/bbl (↓3.2% YoY, target 38 by 2027)
+- Methane Emissions: 0.12% of throughput (best-in-class: <0.10%)
+- Water Withdrawal: 1.85 m³/bbl (industry avg: 2.1)
+- Waste Recycling: 94.2% (target: 95%)
+
+Social (Score: 80.1)
+- Safety TRIR: 0.28 (target: <0.20)
+- Training Hours: 42.5/employee/quarter
+- Community Investment: $1.2M (target: $1.5M)
+- Diversity: 28% women in technical roles (target: 35%)
+
+Governance (Score: 79.8)
+- Board Independence: 85%
+- Ethics Training Compliance: 100%
+- Supply Chain Audits: 92% complete
+- Cybersecurity Maturity: Level 3 (target: Level 4)`,
+  'shift': `## Shift Report — Night Shift (18:00–06:00) | June 22, 2026
+
+Production Summary
+- Crude Processed: 11,863 bbl (98.9% of plan)
+- Product Yields: Gasoline 42.1%, Diesel 35.4%, Jet 8.2%, Fuel Oil 10.8%, LPG 3.5%
+- Quality: All products on-spec except diesel sulfur at 8.2 ppm (limit: 10 ppm)
+
+Key Events
+- 20:38: FCC reactor differential pressure high alarm — reduced feed 10%, resolved 21:15
+- 22:45: H₂ recycle flow low — switched to spare compressor
+- 01:20: Crude slate change completed (Arab Light → WTI) — 4.2 hours
+- 03:15: Boiler feedwater heater leak isolated — no production impact
+
+Safety & Environment
+- 0 recordable incidents
+- 2 near-misses: steam leak (TK-402 area), loose guard on P-101B
+- Flaring: 12.4 tonnes CO₂e (unplanned, compressor trip)
+- VOC emissions: within permit limits
+
+Equipment Status
+- C-201: Operating at 90% capacity — seal leak monitored
+- V-401: Scheduled for packing replacement next shift
+- All other critical equipment: normal
+
+Handover Notes for Day Shift
+1. Monitor C-201 seal differential pressure — maintenance on standby
+2. Catalyst addition scheduled 06:30 — confirm crane availability
+3. Review diesel sulfur trend — may need HDS temperature increase`,
+  'default': `I'm analyzing your request using the PlantMind AI reasoning engine. Based on current process data, historical patterns, and predictive models, I can provide the following insights:
+
+Current Plant Status: Unit 7 is operating at 96.4% availability with 284.7K bbl/day throughput. AI confidence is 94.5%.
+
+Recent Anomalies Detected:
+- C-201 compressor vibration trending upward (+12% over 48 hours)
+- FCC catalyst activity declining at 0.8% per day
+- Carbon intensity 12% above target due to feed quality changes
+
+Predictive Outlook (next 72 hours):
+- 78% probability of maintaining >95% availability
+- 15% probability of C-201 forcing rate reduction >15%
+- Expected profit recovery to $1.31M/day if crude slate optimization is implemented
+
+Would you like me to generate a detailed action plan, run a scenario simulation, or drill down into a specific unit?`
+};
+
+const UNITS_PERF = [
+  { name: 'CDU', utilization: 94.2, availability: 99.1, yield: 98.4, energy: 4.2, issues: 0 },
+  { name: 'VDU', utilization: 91.8, availability: 98.7, yield: 97.2, energy: 3.8, issues: 1 },
+  { name: 'FCC', utilization: 88.4, availability: 96.2, yield: 94.1, energy: 5.6, issues: 2 },
+  { name: 'HDS', utilization: 92.5, availability: 98.4, yield: 98.8, energy: 4.1, issues: 0 },
+  { name: 'Reformer', utilization: 95.1, availability: 99.3, yield: 99.1, energy: 5.2, issues: 0 },
+  { name: 'Hydrocracker', utilization: 93.7, availability: 98.9, yield: 97.5, energy: 4.8, issues: 0 },
+];
+
+const UNIT_DETAIL = {
+  tanks: { name: 'Crude Storage', status: 'normal', temp: 28.5, level: 78.2, pressure: 1.2 },
+  cdu: { name: 'CDU', status: 'normal', temp: 385.4, level: 92.1, pressure: 2.8 },
+  vdu: { name: 'VDU', status: 'normal', temp: 420.1, level: 85.4, pressure: 0.15 },
+  fcc: { name: 'FCC', status: 'warning', temp: 520.3, level: 68.2, pressure: 2.5 },
+  hds: { name: 'HDS', status: 'normal', temp: 340.2, level: 74.5, pressure: 28.5 },
+  reformer: { name: 'Reformer', status: 'normal', temp: 495.0, level: 88.1, pressure: 12.4 },
+  cooling: { name: 'Cooling Tower', status: 'normal', temp: 32.1, level: 95.0, pressure: 0.5 },
+  boilers: { name: 'Boilers', status: 'normal', temp: 540.0, level: 82.3, pressure: 85.0 },
+  flare: { name: 'Flare System', status: 'warning', temp: 850.0, level: 0, pressure: 0.2 },
+  product: { name: 'Product Storage', status: 'normal', temp: 25.0, level: 62.5, pressure: 1.1 },
+};
+
+// ===== NAVIGATION =====
+const NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+  { id: 'digital-twin', label: 'Digital Twin', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+  { id: 'ai-copilot', label: 'AI Copilot', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+  { id: 'historian', label: 'Historian', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4' },
+  { id: 'predictive', label: 'Predictive Maintenance', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+  { id: 'alarms', label: 'Alarm Center', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
+  { id: 'operations', label: 'Operations', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+  { id: 'carbon', label: 'Carbon Intelligence', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
+  { id: 'multi-site', label: 'Multi-Site Command', icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { id: 'reports', label: 'Reports', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  { id: 'admin', label: 'Admin', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+  { id: 'settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+];
+
+let currentPage = 'dashboard';
+
+function initNav() {
+  const container = document.getElementById('nav-items');
+  container.innerHTML = NAV.map(item => \`
+    <button onclick="goPage('\${item.id}')" class="nav-item w-full \${item.id === currentPage ? 'active' : ''}" data-page="\${item.id}">
+      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="\${item.icon}"/></svg>
+      <span class="nav-text">\${item.label}</span>
+      \${item.id === currentPage ? '<div class="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400"></div>' : ''}
+    </button>
+  \`).join('');
+}
+
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active'); if(n.dataset.page === id) n.classList.add('active'); });
+  currentPage = id;
+  initNav();
+  if (id === 'dashboard') setTimeout(initDashboardCharts, 50);
+  if (id === 'historian') setTimeout(initHistorianCharts, 50);
+  if (id === 'multi-site') setTimeout(initMultiSiteCharts, 50);
+  if (id === 'operations') setTimeout(initOperationsCharts, 50);
+  if (id === 'carbon') setTimeout(initCarbonCharts, 50);
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('w-64');
+  sb.classList.toggle('w-20');
+  document.querySelectorAll('.nav-text').forEach(el => el.classList.toggle('hidden'));
+}
+
+// ===== CLOCK =====
+setInterval(() => {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toISOString().slice(0,19).replace('T',' ');
+}, 1000);
+
+// ===== KPI RENDER =====
+function renderKPIs() {
+  const grid = document.getElementById('kpi-grid');
+  grid.innerHTML = KPI_DATA.map((kpi, i) => {
+    const isPos = kpi.trend >= 0;
+    const statusColor = kpi.status === 'good' ? 'text-emerald-400' : 'text-amber-400';
+    const statusBg = kpi.status === 'good' ? 'bg-emerald-500/10' : 'bg-amber-500/10';
+    return \`
+      <div class="glass-card p-5 hover:bg-slate-800/60 transition-colors" style="animation: fadeIn 0.4s ease \${i*0.05}s both">
+        <div class="flex items-start justify-between mb-3">
+          <div class="p-2 rounded-lg \${statusBg}"><svg class="w-5 h-5 \${statusColor}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+          <div class="flex items-center gap-1 text-xs font-medium \${isPos ? 'text-emerald-400' : 'text-rose-400'}">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="\${isPos ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6'}"/></svg>
+            \${Math.abs(kpi.trend)}%
+          </div>
+        </div>
+        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">\${kpi.title}</div>
+        <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-slate-100">\${kpi.value}</span><span class="text-sm text-slate-500">\${kpi.unit}</span></div>
+        <div class="mt-2 text-xs text-slate-500">Target: <span class="text-slate-300">\${kpi.target}</span></div>
+      </div>
+    \`;
+  }).join('');
+}
+
+// ===== DASHBOARD CHARTS =====
+function initDashboardCharts() {
+  const prodCtx = document.getElementById('chart-production');
+  if (!prodCtx || prodCtx.dataset.chart) return;
+  prodCtx.dataset.chart = '1';
+
+  const days = Array.from({length:14}, (_,i) => \`Jun \${i+9}\`);
+  const actual = days.map(() => 275 + Math.random()*25);
+  const plan = days.map(() => 300);
+  const forecast = days.map(() => 280 + Math.random()*15);
+
+  new Chart(prodCtx, {
+    type: 'line',
+    data: { labels: days, datasets: [
+      { label: 'Actual', data: actual, borderColor: '#06B6D4', backgroundColor: 'rgba(6,182,212,0.1)', fill: true, tension: 0.4, pointRadius: 0 },
+      { label: 'Plan', data: plan, borderColor: '#F59E0B', borderDash: [5,5], tension: 0, pointRadius: 0 },
+      { label: 'AI Forecast', data: forecast, borderColor: '#10B981', borderDash: [3,3], tension: 0.4, pointRadius: 0 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94A3B8', font: { size: 11 } } } }, scales: { x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155', drawBorder: false } }, y: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155', drawBorder: false }, min: 250, max: 320 } } }
+  });
+
+  new Chart(document.getElementById('chart-cost'), {
+    type: 'doughnut',
+    data: { labels: ['Crude Cost','Energy','Chemicals','Labor','Maintenance','Profit'], datasets: [{ data: [62.4,8.2,4.1,3.8,2.5,19.0], backgroundColor: ['#F43F5E','#F59E0B','#8B5CF6','#3B82F6','#06B6D4','#10B981'], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 10 }, boxWidth: 10 } } } }
+  });
+
+  const months = ['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'];
+  new Chart(document.getElementById('chart-reliability'), {
+    type: 'line',
+    data: { labels: months, datasets: [
+      { label: 'MTBF (hrs)', data: months.map(() => 4000 + Math.random()*1500), borderColor: '#06B6D4', tension: 0.4, pointRadius: 3 },
+      { label: 'MTTR (hrs)', data: months.map(() => 3.5 + Math.random()*2), borderColor: '#F59E0B', tension: 0.4, pointRadius: 3 },
+      { label: 'Availability (%)', data: months.map(() => 95 + Math.random()*4), borderColor: '#10B981', tension: 0.4, pointRadius: 3, yAxisID: 'y1' }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94A3B8', font: { size: 11 } } } }, scales: { x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155' } }, y: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155' }, min: 3000, max: 6000 }, y1: { position: 'right', ticks: { color: '#64748B', font: { size: 10 } }, grid: { drawOnChartArea: false }, min: 90, max: 100 } } }
+  });
+
+  new Chart(document.getElementById('chart-alarms'), {
+    type: 'bar',
+    data: { labels: ['Emergency','Critical','High','Warning','Info'], datasets: [{ data: [2,8,24,67,142], backgroundColor: ['#7F1D1D','#F43F5E','#F59E0B','#3B82F6','#64748B'], borderRadius: 4 }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155' } }, y: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { display: false } } } }
+  });
+}
+
+// ===== DIGITAL TWIN =====
+function selectUnit(id) {
+  const unit = UNIT_DETAIL[id];
+  if (!unit) return;
+  const statusColor = unit.status === 'normal' ? 'text-emerald-400' : 'text-amber-400';
+  const statusBg = unit.status === 'normal' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+  document.getElementById('unit-detail').innerHTML = \`
+    <div class="flex items-center justify-between mb-4"><h3 class="font-semibold text-slate-100">\${unit.name}</h3><span class="px-2 py-0.5 rounded text-xs font-medium border \${statusBg}">\${unit.status.toUpperCase()}</span></div>
+    <div class="space-y-3">
+      <div class="flex justify-between text-sm"><span class="text-slate-400 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Temperature</span><span class="font-mono text-slate-200">\${unit.temp} °C</span></div>
+      <div class="flex justify-between text-sm"><span class="text-slate-400 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Pressure</span><span class="font-mono text-slate-200">\${unit.pressure} bar</span></div>
+      <div class="flex justify-between text-sm"><span class="text-slate-400 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Level</span><span class="font-mono text-slate-200">\${unit.level}%</span></div>
+    </div>
+    <div class="mt-4 pt-4 border-t border-slate-700/50"><div class="text-xs text-slate-500 mb-2">Equipment Health</div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full \${unit.status === 'normal' ? 'bg-emerald-400' : 'bg-amber-400'}" style="width:\${unit.level}%"></div></div><div class="text-right text-xs text-slate-400 mt-1">\${unit.level}%</div></div>
+  \`;
+}
+
+// ===== AI COPILOT =====
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const container = document.getElementById('chat-messages');
+  container.innerHTML += \`
+    <div class="flex gap-3 justify-end chat-msg"><div class="max-w-[80%] rounded-xl p-4 text-sm bg-cyan-600/20 border border-cyan-500/20 text-slate-100">\${text}</div>
+      <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>
+    </div>
+    <div class="flex gap-3 chat-msg" id="typing-indicator"><div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+      <div class="max-w-[80%] rounded-xl p-4 bg-slate-800/60 border border-slate-700/50 text-slate-200"><div class="flex items-center gap-2 text-sm text-slate-400"><svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Analyzing process data...</div></div>
+    </div>
+  \`;
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+  setTimeout(() => {
+    document.getElementById('typing-indicator').remove();
+    const lower = text.toLowerCase();
+    let resp = AI_RESPONSES.default;
+    if (lower.includes('profit')) resp = AI_RESPONSES.profit;
+    else if (lower.includes('carbon')) resp = AI_RESPONSES.carbon;
+    else if (lower.includes('equipment') || lower.includes('risk')) resp = AI_RESPONSES.equipment;
+    else if (lower.includes('efficiency')) resp = AI_RESPONSES.efficiency;
+    else if (lower.includes('executive')) resp = AI_RESPONSES.executive;
+    else if (lower.includes('maintenance')) resp = AI_RESPONSES.maintenance;
+    else if (lower.includes('esg')) resp = AI_RESPONSES.esg;
+    else if (lower.includes('shift')) resp = AI_RESPONSES.shift;
+    container.innerHTML += \`<div class="flex gap-3 chat-msg"><div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div><div class="max-w-[80%] rounded-xl p-4 text-sm leading-relaxed bg-slate-800/60 border border-slate-700/50 text-slate-200 whitespace-pre-wrap">\${resp.replace(/\n/g, '<br>')}</div></div>\`;
+    container.scrollTop = container.scrollHeight;
+  }, 1500);
+}
+
+function sendPrompt(text) { document.getElementById('chat-input').value = text; sendChat(); }
+
+// ===== HISTORIAN =====
+function switchHistTab(tab) {
+  document.querySelectorAll('.hist-tab').forEach(t => { t.classList.remove('active', 'bg-cyan-500/10', 'text-cyan-400', 'border-cyan-500/20'); t.classList.add('bg-slate-800/40', 'text-slate-400', 'border-slate-700/30'); });
+  event.target.closest('.hist-tab').classList.remove('bg-slate-800/40', 'text-slate-400', 'border-slate-700/30');
+  event.target.closest('.hist-tab').classList.add('active', 'bg-cyan-500/10', 'text-cyan-400', 'border-cyan-500/20');
+}
+
+function initHistorianCharts() {
+  const tCtx = document.getElementById('chart-hist-temp');
+  if (!tCtx || tCtx.dataset.chart) return;
+  tCtx.dataset.chart = '1';
+  const hours = Array.from({length:24}, (_,i) => \`\${String(i).padStart(2,'0')}:00\`);
+  const temps = hours.map(() => 380 + Math.random()*15 - 7.5);
+  const pressures = hours.map(() => 28 + Math.random()*2 - 1);
+
+  new Chart(tCtx, { type: 'line', data: { labels: hours, datasets: [{ label: 'Temp', data: temps, borderColor: '#F43F5E', tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748B', font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: '#334155' } }, y: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155' }, min: 370, max: 400 } } } });
+
+  new Chart(document.getElementById('chart-hist-pressure'), { type: 'line', data: { labels: hours, datasets: [{ label: 'Pressure', data: pressures, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748B', font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: '#334155' } }, y: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155' }, min: 25, max: 32 } } } });
+
+  const tbody = document.getElementById('sensor-table-body');
+  tbody.innerHTML = hours.map((h, i) => \`<tr class="border-b border-slate-700/30 hover:bg-slate-800/40"><td class="py-2 px-3 text-slate-300 font-mono">\${h}</td><td class="py-2 px-3 text-right text-slate-200 font-mono">\${temps[i].toFixed(1)}</td><td class="py-2 px-3 text-right text-slate-200 font-mono">\${pressures[i].toFixed(2)}</td><td class="py-2 px-3 text-right text-slate-200 font-mono">\${(12 + Math.random()*1.5 - 0.75).toFixed(2)}</td><td class="py-2 px-3 text-right text-slate-200 font-mono">\${(75 + Math.random()*8 - 4).toFixed(1)}</td></tr>\`).join('');
+}
+
+// ===== PREDICTIVE MAINTENANCE =====
+function renderEquipment(filterType) {
+  const grid = document.getElementById('equipment-grid');
+  const filtered = filterType === 'All' ? EQUIPMENT : EQUIPMENT.filter(e => e.type === filterType);
+  grid.innerHTML = filtered.map((eq, i) => {
+    const healthColor = eq.health >= 90 ? 'bg-emerald-500' : eq.health >= 80 ? 'bg-cyan-500' : eq.health >= 70 ? 'bg-amber-500' : 'bg-rose-500';
+    const riskBadge = eq.risk === 'Low' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' : eq.risk === 'Medium' ? 'bg-amber-500/15 text-amber-400 border-amber-500/20' : 'bg-rose-500/15 text-rose-400 border-rose-500/20';
+    const priorityBadge = eq.priority === 'Low' ? 'bg-slate-700/50 text-slate-400' : eq.priority === 'Medium' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400';
+    const borderColor = eq.risk === 'High' ? 'border-l-rose-500' : eq.risk === 'Medium' ? 'border-l-amber-500' : 'border-l-emerald-500';
+    return \`
+      <div class="glass-card p-5 hover:bg-slate-800/60 transition-all border-l-4 \${borderColor}" style="animation: fadeIn 0.4s ease \${i*0.05}s both">
+        <div class="flex items-start justify-between mb-3">
+          <div><div class="text-xs text-slate-500 font-mono">\${eq.id}</div><div class="text-sm font-semibold text-slate-100">\${eq.name}</div><div class="text-xs text-slate-500">\${eq.type}</div></div>
+          <div class="px-2 py-1 rounded text-xs font-medium border \${riskBadge}">\${eq.risk} Risk</div>
+        </div>
+        <div class="space-y-3">
+          <div><div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Health Score</span><span class="font-mono font-medium \${eq.health >= 80 ? 'text-emerald-400' : 'text-amber-400'}">\${eq.health}%</span></div><div class="w-full bg-slate-700/50 rounded-full h-2"><div class="h-2 rounded-full \${healthColor}" style="width:\${eq.health}%"></div></div></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-800/40 rounded-lg p-2.5"><div class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Failure Prob</div><div class="text-lg font-bold font-mono \${eq.failureProb > 10 ? 'text-rose-400' : 'text-slate-200'}">\${eq.failureProb}%</div></div>
+            <div class="bg-slate-800/40 rounded-lg p-2.5"><div class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">RUL</div><div class="text-lg font-bold font-mono text-slate-200">\${eq.rul.toLocaleString()} <span class="text-xs text-slate-500">hrs</span></div></div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-slate-700/30"><span class="px-2 py-0.5 rounded text-xs font-medium \${priorityBadge}">\${eq.priority} Priority</span><button class="text-xs text-cyan-400 hover:text-cyan-300 font-medium">View Details →</button></div>
+        </div>
+      </div>
+    \`;
+  }).join('');
+}
+
+function filterEquip(type) {
+  document.querySelectorAll('.equip-filter').forEach(b => { b.classList.remove('bg-cyan-500/20', 'text-cyan-400', 'border-cyan-500/30'); b.classList.add('bg-slate-800/40', 'text-slate-400', 'border-slate-700/30'); });
+  event.target.classList.remove('bg-slate-800/40', 'text-slate-400', 'border-slate-700/30');
+  event.target.classList.add('bg-cyan-500/20', 'text-cyan-400', 'border-cyan-500/30');
+  renderEquipment(type);
+}
+
+// ===== ALARM CENTER =====
+let alarmCategory = 'All';
+function renderAlarms() {
+  const search = document.getElementById('alarm-search')?.value.toLowerCase() || '';
+  const filtered = ALARMS.filter(a => (alarmCategory === 'All' || a.category === alarmCategory) && (a.description.toLowerCase().includes(search) || a.tag.toLowerCase().includes(search)));
+  const list = document.getElementById('alarm-list');
+  const stats = { Emergency: 0, Critical: 0, High: 0, Warning: 0, Info: 0 };
+  ALARMS.forEach(a => stats[a.category]++);
+  document.getElementById('alarm-stats').innerHTML = Object.entries(stats).map(([cat, count]) => {
+    const colors = { Emergency: 'bg-rose-950/50 text-rose-400 border-rose-500/30', Critical: 'bg-rose-900/30 text-rose-400 border-rose-500/20', High: 'bg-amber-900/30 text-amber-400 border-amber-500/20', Warning: 'bg-blue-900/30 text-blue-400 border-blue-500/20', Info: 'bg-slate-800/50 text-slate-400 border-slate-600/20' };
+    const isActive = alarmCategory === cat;
+    return \`<button onclick="setAlarmCat('\${cat}')" class="glass-card p-3 text-left transition-all border \${isActive ? colors[cat] : 'border-slate-700/30 hover:border-slate-600/50'}" style="flex:1"><div class="flex items-center gap-2 mb-2"><span class="\${isActive ? '' : 'text-slate-500'} text-xs font-medium">\${cat}</span></div><div class="\${isActive ? '' : 'text-slate-200'} text-2xl font-bold">\${count}</div></button>\`;
+  }).join('');
+
+  list.innerHTML = filtered.map(alarm => {
+    const borderColors = { Emergency: 'border-l-rose-600', Critical: 'border-l-rose-500', High: 'border-l-amber-500', Warning: 'border-l-blue-500', Info: 'border-l-slate-500' };
+    const dotColors = { Emergency: 'bg-rose-500', Critical: 'bg-rose-400', High: 'bg-amber-400', Warning: 'bg-blue-400', Info: 'bg-slate-400' };
+    const badgeColors = { Emergency: 'bg-rose-950/50 text-rose-400', Critical: 'bg-rose-900/30 text-rose-400', High: 'bg-amber-900/30 text-amber-400', Warning: 'bg-blue-900/30 text-blue-400', Info: 'bg-slate-800/50 text-slate-400' };
+    return \`
+      <div class="glass-card overflow-hidden border-l-4 \${borderColors[alarm.category]}">
+        <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-800/40 transition-colors" onclick="toggleAlarm(\${alarm.id})">
+          <div class="w-2 h-2 rounded-full flex-shrink-0 \${dotColors[alarm.category]} \${alarm.category === 'Emergency' ? 'pulse-dot' : ''}"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-mono text-slate-500">\${alarm.tag}</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider \${badgeColors[alarm.category]}">\${alarm.category}</span>
+              \${!alarm.acknowledged ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 uppercase">New</span>' : ''}
+            </div>
+            <div class="text-sm font-medium text-slate-200 truncate">\${alarm.description}</div>
+            <div class="text-xs text-slate-500 mt-0.5">\${alarm.unit} • \${alarm.timestamp}</div>
+          </div>
+          <svg class="w-4 h-4 text-slate-500 transition-transform" id="alarm-chevron-\${alarm.id}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div id="alarm-detail-\${alarm.id}" class="hidden px-4 pb-4 pt-2 border-t border-slate-700/30 space-y-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-slate-800/40 rounded-lg p-3"><div class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Root Cause</div><div class="text-sm text-slate-200">\${alarm.rootCause}</div></div>
+            <div class="bg-slate-800/40 rounded-lg p-3"><div class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Recommended Action</div><div class="text-sm text-slate-200">\${alarm.action}</div></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="px-4 py-2 bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-medium hover:bg-cyan-600/30 transition-colors">Acknowledge</button>
+            <button class="px-4 py-2 bg-slate-700/50 text-slate-300 rounded-lg text-xs font-medium hover:bg-slate-700 transition-colors">Create Work Order</button>
+            <button class="px-4 py-2 bg-slate-700/50 text-slate-300 rounded-lg text-xs font-medium hover:bg-slate-700 transition-colors">View Trend</button>
+          </div>
+        </div>
+      </div>
+    \`;
+  }).join('');
+}
+
+function setAlarmCat(cat) { alarmCategory = cat; renderAlarms(); }
+function filterAlarms() { renderAlarms(); }
+function toggleAlarm(id) {
+  const detail = document.getElementById('alarm-detail-' + id);
+  const chevron = document.getElementById('alarm-chevron-' + id);
+  detail.classList.toggle('hidden');
+  chevron.style.transform = detail.classList.contains('hidden') ? '' : 'rotate(180deg)';
+}
+
+// ===== OPERATIONS =====
+function initOperationsCharts() {
+  const ctx = document.getElementById('chart-losses');
+  if (!ctx || ctx.dataset.chart) return;
+  ctx.dataset.chart = '1';
+  new Chart(ctx, { type: 'doughnut', data: { labels: ['Unplanned Downtime','Yield Loss','Energy Overconsumption','Quality Giveaway','Maintenance Deferral'], datasets: [{ data: [315000,285000,198000,156000,156000], backgroundColor: ['#F43F5E','#F59E0B','#3B82F6','#8B5CF6','#06B6D4'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 10 }, boxWidth: 10 } } } } });
+}
+
+function renderUnitPerformance() {
+  document.getElementById('unit-performance').innerHTML = UNITS_PERF.map(unit => \`
+    <div class="bg-slate-800/40 rounded-lg p-3">
+      <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-slate-200">\${unit.name}</span><div class="flex items-center gap-2">\${unit.issues > 0 ? '<span class="flex items-center gap-1 text-xs text-amber-400"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>' + unit.issues + ' issues</span>' : ''}<span class="text-xs font-medium \${unit.availability >= 99 ? 'text-emerald-400' : 'text-amber-400'}">\${unit.availability}%</span></div></div>
+      <div class="grid grid-cols-3 gap-2 text-xs"><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">Utilization</div><div class="font-mono text-slate-200">\${unit.utilization}%</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">Yield</div><div class="font-mono text-slate-200">\${unit.yield}%</div></div><div class="text-center p-2 bg-slate-900/50 rounded"><div class="text-slate-500">Energy</div><div class="font-mono text-slate-200">\${unit.energy} GJ</div></div></div>
+    </div>
+  \`).join('');
+}
+
+// ===== CARBON =====
+function initCarbonCharts() {
+  const ctx = document.getElementById('chart-carbon-forecast');
+  if (!ctx || ctx.dataset.chart) return;
+  ctx.dataset.chart = '1';
+  const years = ['2024','2025','2026','2027','2028','2029','2030'];
+  const actual = [4.85, 4.72, 4.58, null, null, null, null];
+  const target = [4.90, 4.60, 4.40, 4.20, 3.90, 3.60, 3.20];
+  new Chart(ctx, { type: 'line', data: { labels: years, datasets: [
+    { label: 'Actual', data: actual, borderColor: '#10B981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4, spanGaps: true, pointRadius: 4 },
+    { label: 'Target', data: target, borderColor: '#F59E0B', borderDash: [5,5], tension: 0.4, pointRadius: 4 }
+  ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94A3B8', font: { size: 11 } } } }, scales: { x: { ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: '#334155' } }, y: { ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: '#334155' }, min: 2.5, max: 5.5 } } } });
+}
+
+// ===== MULTI-SITE =====
+function initMultiSiteCharts() {
+  const pCtx = document.getElementById('chart-profit-compare');
+  if (!pCtx || pCtx.dataset.chart) return;
+  pCtx.dataset.chart = '1';
+  const sorted = [...SITES].sort((a,b) => b.profit - a.profit);
+  new Chart(pCtx, { type: 'bar', data: { labels: sorted.map(s => s.name), datasets: [{ label: 'Profit ($M/day)', data: sorted.map(s => s.profit), backgroundColor: '#10B981', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#334155' } }, y: { ticks: { color: '#64748B', font: { size: 9 } }, grid: { display: false } } } } });
+
+  const rCtx = document.getElementById('chart-radar');
+  new Chart(rCtx, { type: 'radar', data: { labels: ['Profit','Carbon','Reliability','Efficiency','ESG'], datasets: [
+    { label: 'Jamnagar', data: [82, 61, 99.1, 93.4, 82.1], borderColor: '#10B981', backgroundColor: 'rgba(16,185,129,0.1)', pointRadius: 0 },
+    { label: 'Baytown', data: [68, 57, 98.7, 91.2, 78.4], borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.1)', pointRadius: 0 }
+  ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94A3B8', font: { size: 11 } } } }, scales: { r: { ticks: { color: '#64748B', backdropColor: 'transparent' }, grid: { color: '#334155' }, pointLabels: { color: '#64748B', font: { size: 10 } } } } } });
+}
+
+function renderSiteCards() {
+  document.getElementById('site-cards').innerHTML = SITES.map((site, i) => \`
+    <div class="glass-card p-5 hover:bg-slate-800/60 transition-all" style="animation: fadeIn 0.4s ease \${i*0.05}s both">
+      <div class="flex items-start justify-between mb-3"><div><div class="text-xs text-slate-500">\${site.country}</div><div class="text-sm font-semibold text-slate-100">\${site.name}</div></div><div class="px-2 py-0.5 rounded text-xs font-medium \${i===0 ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-700/50 text-slate-400'}">#\${i+1}</div></div>
+      <div class="grid grid-cols-2 gap-3 mb-3"><div class="bg-slate-900/50 rounded p-2"><div class="text-[10px] text-slate-500">Profit</div><div class="text-sm font-bold text-emerald-400">$\${site.profit}M/day</div></div><div class="bg-slate-900/50 rounded p-2"><div class="text-[10px] text-slate-500">Carbon</div><div class="text-sm font-bold text-slate-200">\${site.carbon} kg/bbl</div></div><div class="bg-slate-900/50 rounded p-2"><div class="text-[10px] text-slate-500">Reliability</div><div class="text-sm font-bold text-slate-200">\${site.reliability}%</div></div><div class="bg-slate-900/50 rounded p-2"><div class="text-[10px] text-slate-500">ESG</div><div class="text-sm font-bold text-cyan-400">\${site.esg}</div></div></div>
+      <div class="text-xs text-slate-500">Production: <span class="text-slate-300">\${site.production}K bbl/day</span></div>
+    </div>
+  \`).join('');
+
+  const sortedProfit = [...SITES].sort((a,b) => b.profit - a.profit);
+  document.getElementById('profit-ranking').innerHTML = sortedProfit.map((s, i) => \`
+    <div class="flex items-center gap-3 text-sm"><span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold \${i===0 ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-700/50 text-slate-400'}">\${i+1}</span><span class="flex-1 text-slate-200">\${s.name}</span><span class="text-emerald-400 font-mono">$\${s.profit}M</span></div>
+  \`).join('');
+
+  const sortedESG = [...SITES].sort((a,b) => b.esg - a.esg);
+  document.getElementById('esg-ranking').innerHTML = sortedESG.map((s, i) => \`
+    <div class="flex items-center gap-3 text-sm"><span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold \${i===0 ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-700/50 text-slate-400'}">\${i+1}</span><span class="flex-1 text-slate-200">\${s.name}</span><span class="text-cyan-400 font-mono">\${s.esg}</span></div>
+  \`).join('');
+}
+
+// ===== ADMIN =====
+let adminRoleFilter = 'All';
+function renderAdmin() {
+  const search = document.getElementById('admin-search')?.value.toLowerCase() || '';
+  const filtered = USERS.filter(u => (adminRoleFilter === 'All' || u.role === adminRoleFilter) && (u.name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search)));
+  const roles = ['All', ...new Set(USERS.map(u => u.role))];
+  document.getElementById('admin-role-filters').innerHTML = roles.map(r => \`
+    <button onclick="setAdminRole('\${r}')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all \${adminRoleFilter === r ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200'}">\${r}</button>
+  \`).join('');
+
+  const roleColors = { Admin: 'bg-violet-500/20 text-violet-400', 'Plant Manager': 'bg-cyan-500/20 text-cyan-400', 'Process Engineer': 'bg-blue-500/20 text-blue-400', 'Maintenance Engineer': 'bg-amber-500/20 text-amber-400', Operator: 'bg-slate-500/20 text-slate-400' };
+  const statusIcons = { Active: '<svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', Away: '<svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', Inactive: '<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' };
+
+  document.getElementById('admin-table-body').innerHTML = filtered.map(user => \`
+    <tr class="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors">
+      <td class="py-3 px-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white">\${user.name.split(' ').map(n=>n[0]).join('')}</div><div><div class="text-sm font-medium text-slate-200">\${user.name}</div><div class="text-xs text-slate-500">\${user.email}</div></div></div></td>
+      <td class="py-3 px-3"><span class="px-2 py-1 rounded text-xs font-medium \${roleColors[user.role] || 'bg-slate-500/20 text-slate-400'}">\${user.role}</span></td>
+      <td class="py-3 px-3 text-slate-300">\${user.plant}</td>
+      <td class="py-3 px-3"><div class="flex items-center gap-1.5">\${statusIcons[user.status]}<span class="text-xs text-slate-300">\${user.status}</span></div></td>
+      <td class="py-3 px-3 text-xs text-slate-500">\${user.lastActive}</td>
+      <td class="py-3 px-3 text-right"><div class="flex items-center justify-end gap-2"><button class="p-1.5 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-cyan-400 transition-colors"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button class="p-1.5 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td>
+    </tr>
+  \`).join('');
+}
+
+function setAdminRole(role) { adminRoleFilter = role; renderAdmin(); }
+function filterAdmin() { renderAdmin(); }
+
+// ===== SETTINGS =====
+const SETTINGS_SECTIONS = [
+  { id: 'plant', label: 'Plant Configuration', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+  { id: 'units', label: 'Unit Configuration', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+  { id: 'alarms', label: 'Alarm Limits', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
+  { id: 'ai', label: 'AI Configuration', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+  { id: 'theme', label: 'Theme Settings', icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01' },
+];
+let activeSetting = 'plant';
+
+function renderSettings() {
+  document.getElementById('settings-nav').innerHTML = SETTINGS_SECTIONS.map(s => \`
+    <button onclick="setSetting('\${s.id}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all text-left \${activeSetting === s.id ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-slate-800/40 text-slate-400 border border-slate-700/30 hover:text-slate-200'}">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="\${s.icon}"/></svg>\${s.label}
+    </button>
+  \`).join('');
+
+  const contents = {
+    plant: \`<div class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="text-xs text-slate-500 mb-1.5 block">Plant Name</label><input type="text" value="Gulf Coast Refinery Complex — Unit 7" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50"/></div><div><label class="text-xs text-slate-500 mb-1.5 block">Location</label><input type="text" value="Baytown, Texas, USA" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50"/></div><div><label class="text-xs text-slate-500 mb-1.5 block">Design Capacity (K bbl/day)</label><input type="number" value="300" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50"/></div><div><label class="text-xs text-slate-500 mb-1.5 block">Commissioning Date</label><input type="date" value="2015-03-15" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50"/></div></div><div><label class="text-xs text-slate-500 mb-1.5 block">Description</label><textarea rows="3" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50">Integrated refinery complex with CDU, VDU, FCC, HDS, Reformer, and Hydrocracker units.</textarea></div></div>\`,
+    units: \`<div class="space-y-3">\${['CDU','VDU','FCC','HDS','Reformer','Hydrocracker'].map(unit => \`<div class="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg border border-slate-700/30"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div><div class="text-sm font-medium text-slate-200">\${unit}</div><div class="text-xs text-slate-500">Unit ID: \${unit}-701</div></div></div><div class="flex items-center gap-3"><label class="flex items-center gap-2 text-xs text-slate-400"><input type="checkbox" checked class="rounded bg-slate-700 border-slate-600 text-cyan-500"/> Monitored</label><label class="flex items-center gap-2 text-xs text-slate-400"><input type="checkbox" checked class="rounded bg-slate-700 border-slate-600 text-cyan-500"/> AI Enabled</label></div></div>\`).join('')}</div>\`,
+    alarms: \`<div class="space-y-4">\${[{tag:'TI-101A',name:'CDU Furnace Temp',hh:420,h:400,l:350,ll:330},{tag:'PI-201B',name:'FCC Reactor Pressure',hh:35,h:32,l:25,ll:22},{tag:'FI-301C',name:'H2 Recycle Flow',hh:55,h:50,l:35,ll:30},{tag:'LI-401D',name:'VGO Tank Level',hh:98,h:95,l:20,ll:10}].map(a => \`<div class="grid grid-cols-5 gap-3 items-center p-3 bg-slate-800/40 rounded-lg border border-slate-700/30"><div class="col-span-1"><div class="text-xs font-mono text-cyan-400">\${a.tag}</div><div class="text-xs text-slate-500">\${a.name}</div></div><div><label class="text-[10px] text-slate-500 block mb-1">HH</label><input type="number" value="\${a.hh}" class="w-full bg-slate-900/50 border border-slate-700/50 rounded px-2 py-1 text-xs text-rose-400 font-mono"/></div><div><label class="text-[10px] text-slate-500 block mb-1">H</label><input type="number" value="\${a.h}" class="w-full bg-slate-900/50 border border-slate-700/50 rounded px-2 py-1 text-xs text-amber-400 font-mono"/></div><div><label class="text-[10px] text-slate-500 block mb-1">L</label><input type="number" value="\${a.l}" class="w-full bg-slate-900/50 border border-slate-700/50 rounded px-2 py-1 text-xs text-blue-400 font-mono"/></div><div><label class="text-[10px] text-slate-500 block mb-1">LL</label><input type="number" value="\${a.ll}" class="w-full bg-slate-900/50 border border-slate-700/50 rounded px-2 py-1 text-xs text-rose-400 font-mono"/></div></div>\`).join('')}</div>\`,
+    ai: \`<div class="space-y-4"><div class="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30"><div class="flex items-center justify-between mb-3"><div><div class="text-sm font-medium text-slate-200">Anomaly Detection</div><div class="text-xs text-slate-500">Auto-detect process deviations using ML models</div></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"/><div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div></label></div></div><div class="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30"><div class="flex items-center justify-between mb-3"><div><div class="text-sm font-medium text-slate-200">Predictive Maintenance</div><div class="text-xs text-slate-500">Forecast equipment failures using vibration and process data</div></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"/><div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div></label></div></div><div class="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30"><div class="flex items-center justify-between mb-3"><div><div class="text-sm font-medium text-slate-200">Optimization Recommendations</div><div class="text-xs text-slate-500">AI-generated setpoint and scheduling suggestions</div></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"/><div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div></label></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="text-xs text-slate-500 mb-1.5 block">Model Confidence Threshold (%)</label><input type="number" value="85" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50"/></div><div><label class="text-xs text-slate-500 mb-1.5 block">Prediction Horizon (days)</label><input type="number" value="14" class="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50"/></div></div></div>\`,
+    theme: \`<div class="space-y-4"><div class="grid grid-cols-3 gap-4"><button class="p-4 rounded-lg border-2 border-cyan-500/50 bg-slate-800/60 text-left"><div class="w-full h-16 rounded mb-3 border border-slate-700/50 bg-slate-950"></div><div class="text-sm font-medium text-slate-200">Industrial Dark</div></button><button class="p-4 rounded-lg border-2 border-slate-700/30 bg-slate-800/40 hover:border-slate-600/50 text-left"><div class="w-full h-16 rounded mb-3 border border-slate-700/50 bg-slate-900"></div><div class="text-sm font-medium text-slate-200">Midnight Blue</div></button><button class="p-4 rounded-lg border-2 border-slate-700/30 bg-slate-800/40 hover:border-slate-600/50 text-left"><div class="w-full h-16 rounded mb-3 border border-slate-700/50 bg-black"></div><div class="text-sm font-medium text-slate-200">High Contrast</div></button></div><div class="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30"><div class="text-sm font-medium text-slate-200 mb-3">Density</div><div class="flex gap-3"><button class="px-4 py-2 rounded-lg text-xs font-medium bg-slate-900/50 text-slate-400 border border-slate-700/30">Compact</button><button class="px-4 py-2 rounded-lg text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Comfortable</button><button class="px-4 py-2 rounded-lg text-xs font-medium bg-slate-900/50 text-slate-400 border border-slate-700/30">Spacious</button></div></div></div>\`,
+  };
+  document.getElementById('settings-content').innerHTML = \`<h3 class="text-sm font-semibold text-slate-200 mb-4">\${SETTINGS_SECTIONS.find(s => s.id === activeSetting).label}</h3>\${contents[activeSetting]}\`;
+}
+
+function setSetting(id) { activeSetting = id; renderSettings(); }
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  initNav();
+  renderKPIs();
+  renderEquipment('All');
+  renderAlarms();
+  renderUnitPerformance();
+  renderSiteCards();
+  renderAdmin();
+  renderSettings();
+  setTimeout(() => {
+    initDashboardCharts();
+  }, 100);
+});
+</script>
+</body>
+</html>
